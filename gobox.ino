@@ -255,7 +255,7 @@ void draw_text_data()
   tft.setTextColor( GOBOX_COLOR_WHITE, GOBOX_COLOR_BLACK );
 
   // Power Supply
-  tft.print( "Power Supply " );
+  tft.print( "Pwr Supply " );
   tft.print( ps_volts );
   tft.print( "v PWM " );
   tft.print( pwm );
