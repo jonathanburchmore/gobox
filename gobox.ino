@@ -283,7 +283,7 @@ void draw_graph()
   graph_point0_pos = constrain_graph_point_pos( next_graph_point - graph_point_count );
   graph_point1_pos = constrain_graph_point_pos( next_graph_point - graph_point_count + 1 );
 
-  for ( x0 = 0, x1 = 1, graph_points_drawn = 1; graph_points_drawn < graph_point_count; x0++, x1++, graph_points_drawn++ )
+  for ( x0 = GRAPH_POINTS - graph_point_count, x1 = x0 + 1, graph_points_drawn = 1; graph_points_drawn < graph_point_count; x0++, x1++, graph_points_drawn++ )
   {
     tft.drawLine( x0, sol_watts_graph_points[ graph_point0_pos ], x1, sol_watts_graph_points[ graph_point1_pos ], GOBOX_COLOR_YELLOW );
     tft.drawLine( x0, bat_volts_graph_points[ graph_point0_pos ], x1, bat_volts_graph_points[ graph_point1_pos ], GOBOX_COLOR_BLUE );
