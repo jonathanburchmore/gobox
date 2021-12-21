@@ -44,6 +44,7 @@ float bat_volts = 0.00;
 float bat_amps = 0.00;
 
 float ps_volts = 0.00;
+int pwm = 0;
 
 float sol_watts = 0.00;
 
@@ -117,7 +118,6 @@ void read_graph_point()
   String raw_data;
   unsigned int seconds;
   char charging[ 6 ];
-  int pwm;
   float max_amps;
   int sol_volts_whole, sol_volts_fract;
   int sol_amps_whole, sol_amps_fract;
@@ -142,6 +142,7 @@ void read_graph_point()
     bat_amps = 0.00;
 
     ps_volts = 0.00;
+    pwm = 0;
 
     sol_watts = 0.00;
   }
@@ -256,7 +257,9 @@ void draw_text_data()
   // Power Supply
   tft.print( "Power Supply " );
   tft.print( ps_volts );
-  tft.println( "v          " );
+  tft.print( "v PWM " );
+  tft.print( pwm );
+  tft.print( "%            " );
 }
 
 void draw_graph()
