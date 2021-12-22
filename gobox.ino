@@ -20,6 +20,13 @@ Adafruit_ST7735 tft = Adafruit_ST7735( TFT_CS, TFT_DC, TFT_RST );
 
 HT16K33 seg( SEG_ID );
 
+// Fallback Voltage
+//////////////////////////////////////
+
+#define FALLBACK_VOLTAGE_PIN    A0
+#define FALLBACK_VOLTAGE_SCALE  0.014665    // My voltage divider is 1:3 so 15v becomes 5v
+                                            // This value is calibrated to my protoboard/resistor combination
+
 // Colors
 //////////////////////////////////////
 
@@ -138,7 +145,7 @@ void read_graph_point()
     sol_volts = 0.00;
     sol_amps = 0.00;
 
-    bat_volts = 0.00;
+    bat_volts = analogRead( FALLBACK_VOLTAGE_PIN ) * FALLBACK_VOLTAGE_SCALE;
     bat_amps = 0.00;
 
     ps_volts = 0.00;
