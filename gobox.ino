@@ -24,7 +24,7 @@ HT16K33 seg( SEG_ID );
 //////////////////////////////////////
 
 #define FALLBACK_VOLTAGE_PIN    A0
-#define FALLBACK_VOLTAGE_SCALE  0.01485     // My voltage divider is 1:3 so 15v becomes 5v
+#define FALLBACK_VOLTAGE_SCALE  0.014665    // My voltage divider is 1:3 so 15v becomes 5v
                                             // This value is calibrated to my protoboard/resistor combination
 
 // Colors
