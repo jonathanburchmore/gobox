@@ -27,12 +27,7 @@ HT16K33 seg( SEG_ID );
 #define FALLBACK_VOLTAGE_SCALE    0.014665    // My voltage divider is 1:3 so 15v becomes 5v
                                               // This value is calibrated to my protoboard/resistor combination
 
-#define FALLBACK_VOLTAGE_SAMPLES  10          // Use moving average over this many samples
-
-int fallback_voltage_sample_count = 0;
-int next_fallback_voltage_sample = 0;
-
-double fallback_voltage_samples[ FALLBACK_VOLTAGE_SAMPLES ];
+#define FALLBACK_VOLTAGE_AVG      8           // Average this many samples -- configured to match the value used in LLPP
 
 // Colors
 //////////////////////////////////////
@@ -108,33 +103,17 @@ void setup()
   seg.displayOn();
 }
 
-void read_fallback_voltage()
-{
-  int i;
-
-  for ( i = fallback_voltage_sample_count; i <= FALLBACK_VOLTAGE_SAMPLES; i++ )
-  {
-    fallback_voltage_samples[ next_fallback_voltage_sample ] = analogRead( FALLBACK_VOLTAGE_PIN ) * FALLBACK_VOLTAGE_SCALE;
-    if ( ++next_fallback_voltage_sample >= FALLBACK_VOLTAGE_SAMPLES )
-    {
-      next_fallback_voltage_sample = 0;
-    }
-  }
-
-  fallback_voltage_sample_count = FALLBACK_VOLTAGE_SAMPLES;
-}
-
 float fallback_voltage()
 {
-  int i;
-  float sum;
+  int i, sum;
 
-  for ( sum = 0.0, i = 0; i < fallback_voltage_sample_count; i++ )
+  for ( sum = 0, i = 0; i < FALLBACK_VOLTAGE_AVG; i++ )
   {
-    sum += fallback_voltage_samples[ i ];
+    sum += analogRead( FALLBACK_VOLTAGE_PIN );
+    delayMicroseconds( 50 );
   }
 
-  return sum / fallback_voltage_sample_count;
+  return ( sum / FALLBACK_VOLTAGE_AVG ) * FALLBACK_VOLTAGE_SCALE;
 }
 
 int constrain_graph_point_pos( int graph_point_pos )
@@ -346,7 +325,6 @@ void update_voltmeter()
 
 void loop()
 {
-  read_fallback_voltage();
   read_graph_point();
   
   draw_header();
