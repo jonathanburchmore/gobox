@@ -26,6 +26,8 @@ HT16K33 seg( SEG_ID );
 #define FALLBACK_VOLTAGE_PIN      A0
 #define FALLBACK_VOLTAGE_SCALE    0.014665    // My voltage divider is 1:3 so 15v becomes 5v
                                               // This value is calibrated to my protoboard/resistor combination
+#define FALLBACK_VOLTAGE_BIAS     0.538       // I am sampling downstream of the input protection diode.
+                                              // This value is the measured forward voltage of my particular Arduino
 
 #define FALLBACK_VOLTAGE_AVG      8           // Average this many samples -- configured to match the value used in LLPP
 
@@ -113,7 +115,7 @@ float fallback_voltage()
     delayMicroseconds( 50 );
   }
 
-  return ( sum / FALLBACK_VOLTAGE_AVG ) * FALLBACK_VOLTAGE_SCALE;
+  return FALLBACK_VOLTAGE_BIAS + ( ( sum / FALLBACK_VOLTAGE_AVG ) * FALLBACK_VOLTAGE_SCALE );
 }
 
 int constrain_graph_point_pos( int graph_point_pos )
