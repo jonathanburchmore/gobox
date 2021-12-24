@@ -101,8 +101,7 @@ void setup()
   tft.fillScreen( GOBOX_COLOR_BLACK );
 
   seg.begin();
-  Wire.setClock( 100000 );
-  seg.displayOn();
+  seg.brightness( 1 );
 }
 
 float fallback_voltage()
