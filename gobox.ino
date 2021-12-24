@@ -322,7 +322,17 @@ void draw_graph()
 
 void update_voltmeter()
 {
-  seg.displayFloat( bat_volts, 2 );
+  // Display power supply/system voltage when the PwrPanel is on and there is no battery,
+  // as the PwrPanel will report 0.00v for the battery and there's no reason to show that.
+
+  if ( charging_status == noBatt )
+  {
+    seg.displayFloat( fallback_voltage(), 2 );
+  }
+  else
+  {
+    seg.displayFloat( bat_volts, 2 );
+  }
 }
 
 void loop()
