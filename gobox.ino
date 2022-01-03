@@ -90,18 +90,19 @@ byte sol_watts_graph_points[ GRAPH_POINTS ], bat_volts_graph_points[ GRAPH_POINT
 #define LED_SOLAR_MIN           10.0      // Use minimum brightness below this voltage
 #define LED_SOLAR_MAX           20.0      // Use maximum brightness above this voltage
 
-#define LED_BRIGHTNESS_SAMPLES  60        // Base LED brightness on the average of this many previous solar voltage readings
+#define LED_BRIGHTNESS_SAMPLES  60        // Base LED brightness on a moving average smoothed over this many readings
 
-int led_brightness_sample_count = 0;
-float led_brightness_sol_volts  = 0.00;
+int led_brightness_next = 0;
+int led_brightness_samples[ LED_BRIGHTNESS_SAMPLES ];
+
 
 // Functions
 //////////////////////////////////////
 
 void setup()
 {
-  int i, dir;
-  
+  int i;
+
   Serial.begin( 9600 );
 
   Serial1.begin( 115200 );
@@ -113,6 +114,11 @@ void setup()
   tft.setTextWrap( false );
 
   tft.fillScreen( GOBOX_COLOR_BLACK );
+
+  for ( i = 0; i < LED_BRIGHTNESS_SAMPLES; i++ )
+  {
+    led_brightness_samples[ i ] = LED_BRIGHTNESS_MIN; 
+  }
 
   seg.begin();
   seg.brightness( LED_BRIGHTNESS_MIN );
@@ -350,33 +356,35 @@ void update_voltmeter()
 
 void update_led_brightness()
 {
-    int led_brightness;
-    float solar_avg;
+  int i;
+  int led_brightness_point, led_brightness_sum;
     
-    led_brightness_sol_volts      += sol_volts;
+  if ( sol_volts <= LED_SOLAR_MIN )
+  {
+    led_brightness_point  = LED_BRIGHTNESS_MIN;
+  }
+  else if ( sol_volts >= LED_SOLAR_MAX )
+  {
+    led_brightness_point  = LED_BRIGHTNESS_MAX;
+  }
+  else
+  {
+    led_brightness_point  = LED_BRIGHTNESS_MIN + ( ( LED_BRIGHTNESS_MAX - LED_BRIGHTNESS_MIN ) * ( ( sol_volts - LED_SOLAR_MIN ) / ( LED_SOLAR_MAX - LED_SOLAR_MIN ) ) );
+  }
 
-    if ( ++led_brightness_sample_count >= LED_BRIGHTNESS_SAMPLES )
-    {
-      solar_avg                   = led_brightness_sol_volts / led_brightness_sample_count;
+  led_brightness_samples[ led_brightness_next ] = led_brightness_point;
+  if ( ++led_brightness_next >= LED_BRIGHTNESS_SAMPLES )
+  {
+    led_brightness_next = 0;
+  }
 
-      if ( solar_avg <= LED_SOLAR_MIN )
-      {
-        led_brightness            = LED_BRIGHTNESS_MIN;
-      }
-      else if ( solar_avg >= LED_SOLAR_MAX )
-      {
-        led_brightness            = LED_BRIGHTNESS_MAX;
-      }
-      else
-      {
-        led_brightness            = LED_BRIGHTNESS_MIN + ( ( LED_BRIGHTNESS_MAX - LED_BRIGHTNESS_MIN ) * ( ( solar_avg - LED_SOLAR_MIN ) / ( LED_SOLAR_MAX - LED_SOLAR_MIN ) ) );
-      }
-      
-      seg.brightness( led_brightness );
+  // Calculate moving average
+  for ( i = 0, led_brightness_sum = 0; i < LED_BRIGHTNESS_SAMPLES; i++ )
+  {
+    led_brightness_sum += led_brightness_samples[ i ];
+  }
 
-      led_brightness_sol_volts    = 0.0;
-      led_brightness_sample_count = 0;
-    }
+  seg.brightness( led_brightness_sum / LED_BRIGHTNESS_SAMPLES );
 }
 
 void loop()
