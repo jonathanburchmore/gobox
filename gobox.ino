@@ -95,7 +95,6 @@ byte sol_watts_graph_points[ GRAPH_POINTS ], bat_volts_graph_points[ GRAPH_POINT
 int led_brightness_next = 0;
 int led_brightness_samples[ LED_BRIGHTNESS_SAMPLES ];
 
-
 // Functions
 //////////////////////////////////////
 
