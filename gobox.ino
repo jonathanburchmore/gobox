@@ -81,6 +81,20 @@ float sample_bat_amps = 0.0;
 
 byte sol_watts_graph_points[ GRAPH_POINTS ], bat_volts_graph_points[ GRAPH_POINTS ], bat_amps_graph_points[ GRAPH_POINTS ];
 
+// LED Auto-brightness
+//////////////////////////////////////
+
+#define LED_BRIGHTNESS_MIN     1
+#define LED_BRIGHTNESS_MAX     16
+
+#define LED_SOLAR_MIN           10.0      // Use minimum brightness below this voltage
+#define LED_SOLAR_MAX           20.0      // Use maximum brightness above this voltage
+
+#define LED_BRIGHTNESS_SAMPLES  60        // Base LED brightness on the average of this many previous solar voltage readings
+
+int led_brightness_sample_count = 0;
+float led_brightness_sol_volts  = 0.00;
+
 // Functions
 //////////////////////////////////////
 
@@ -101,7 +115,7 @@ void setup()
   tft.fillScreen( GOBOX_COLOR_BLACK );
 
   seg.begin();
-  seg.brightness( 1 );
+  seg.brightness( LED_BRIGHTNESS_MIN );
 }
 
 float fallback_voltage()
@@ -334,6 +348,37 @@ void update_voltmeter()
   }
 }
 
+void update_led_brightness()
+{
+    int led_brightness;
+    float solar_avg;
+    
+    led_brightness_sol_volts      += sol_volts;
+
+    if ( ++led_brightness_sample_count >= LED_BRIGHTNESS_SAMPLES )
+    {
+      solar_avg                   = led_brightness_sol_volts / led_brightness_sample_count;
+
+      if ( solar_avg <= LED_SOLAR_MIN )
+      {
+        led_brightness            = LED_BRIGHTNESS_MIN;
+      }
+      else if ( solar_avg >= LED_SOLAR_MAX )
+      {
+        led_brightness            = LED_BRIGHTNESS_MAX;
+      }
+      else
+      {
+        led_brightness            = LED_BRIGHTNESS_MIN + ( ( LED_BRIGHTNESS_MAX - LED_BRIGHTNESS_MIN ) * ( ( solar_avg - LED_SOLAR_MIN ) / ( LED_SOLAR_MAX - LED_SOLAR_MIN ) ) );
+      }
+      
+      seg.brightness( led_brightness );
+
+      led_brightness_sol_volts    = 0.0;
+      led_brightness_sample_count = 0;
+    }
+}
+
 void loop()
 {
   read_graph_point();
@@ -341,5 +386,6 @@ void loop()
   draw_header();
   draw_text_data();
   draw_graph();
+  update_led_brightness();
   update_voltmeter();
 }
